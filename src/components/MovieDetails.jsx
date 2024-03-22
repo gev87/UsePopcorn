@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import Loader from "./Loader";
 
@@ -8,6 +8,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+  const countRef = useRef(0);
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   const watchedUserRating = watched.find(
@@ -29,15 +30,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   const isTop = imdbRating > 6;
 
-  useEffect(() => {
-    if (title) {
-      document.title = `Movie | ${title}`;
-    }
-    return () =>{
-      document.title = "Use Popcorn";
-    } 
-  }, [title]);
-
   const getMovieDetails = async (id) => {
     try {
       setIsLoading(true);
@@ -52,8 +44,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     }
   };
 
- 
-
   const handleAdd = () => {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -63,22 +53,36 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       imdbRating: +imdbRating,
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
+      countRatingDecision: countRef.current,
     };
-    console.log("watchedUserRating",userRating, imdbRating)
     onAddWatched(newWatchedMovie);
   };
 
-  useEffect(()=>{
-    const callback = (event) =>{
-      if(event.code ==="Escape"){
+  const handleRating = (rate)=>{
+    countRef.current++;
+    setUserRating(rate);
+  }
+
+  useEffect(() => {
+    if (title) {
+      document.title = `Movie | ${title}`;
+    }
+    return () => {
+      document.title = "Use Popcorn";
+    };
+  }, [title]);
+
+  useEffect(() => {
+    const callback = (event) => {
+      if (event.code === "Escape") {
         onCloseMovie();
       }
-    }
-    document.addEventListener('keydown',callback);
-    return ()=> {
-      document.removeEventListener('keydown',callback);
-    }
-  },[onCloseMovie])
+    };
+    document.addEventListener("keydown", callback);
+    return () => {
+      document.removeEventListener("keydown", callback);
+    };
+  }, [onCloseMovie]);
 
   useEffect(() => {
     getMovieDetails(selectedId);
@@ -91,7 +95,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       ) : (
         <>
           <header>
-            <button className="btn-back" onClick={onCloseMovie} >
+            <button className="btn-back" onClick={onCloseMovie}>
               &larr;
             </button>
             <img src={poster} alt={`Poster of ${title} movie`} />
@@ -121,7 +125,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
                     maxRating={10}
                     size={24}
                     messages={[]}
-                    passRating={setUserRating}
+                    passRating={handleRating}
                   />
                   {userRating > 0 && (
                     <button className="btn-add" onClick={handleAdd}>
