@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import Loader from "./Loader";
+import useKey from "hooks/useKey";
 
 const apiKey = "7b99404a";
 
@@ -72,17 +73,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     };
   }, [title]);
 
-  useEffect(() => {
-    const callback = (event) => {
-      if (event.code === "Escape") {
-        onCloseMovie();
-      }
-    };
-    document.addEventListener("keydown", callback);
-    return () => {
-      document.removeEventListener("keydown", callback);
-    };
-  }, [onCloseMovie]);
+  useKey("escape", onCloseMovie);
 
   useEffect(() => {
     getMovieDetails(selectedId);

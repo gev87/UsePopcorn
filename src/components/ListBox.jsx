@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import MovieList from "./MovieList";
 import ToggleButton from "./ToggleButton";
 
 export default function ListBox({children,header}) {
